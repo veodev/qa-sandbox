@@ -1,0 +1,15 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: qa-sandbox-postgres
+    env_file:
+      - ./app/backend/.env
+    environment:
+      POSTGRES_DB: qa_sandbox_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql
+      - ./init-db:/docker-entrypoint-initdb.d
+volumes:
+  postgres_data:
