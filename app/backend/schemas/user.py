@@ -4,13 +4,13 @@ from uuid import UUID
 from pydantic import BaseModel, EmailStr
 
 
-class CreateUserIn(BaseModel):
+class UserIn(BaseModel):
     name: str
     email: EmailStr
     password: str
 
 
-class CreateUserOut(BaseModel):
+class UserOut(BaseModel):
     id: UUID
     name: str
     email: EmailStr

@@ -1,3 +1,3 @@
-from schemas.user import CreateUserIn, CreateUserOut
+from schemas.user import UserIn, UserOut
 
-__all__ = ["CreateUserRq", "CreateUserRsp"]
+__all__ = ["UserIn", "UserOut"]
