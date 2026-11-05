@@ -21,6 +21,10 @@ jobs:
     services:
       postgres:
         image: postgres:18-alpine
+        env:
+          POSTGRES_USER: qa_sandbox_user
+          POSTGRES_PASSWORD: qa_sandbox_pass
+          POSTGRES_DB: qa_sandbox_test_db
         ports:
           - 5432:5432
 
