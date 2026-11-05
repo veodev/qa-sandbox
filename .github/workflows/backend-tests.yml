@@ -1,0 +1,39 @@
+name: Backend Tests
+
+on:
+  push:
+    branches: ["dev"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: qa_sandbox_user
+          POSTGRES_PASSWORD: qa_sandbox_pass
+          POSTGRES_DB: qa_sandbox_test_db
+        ports:
+          - 5432:5432
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        
+      - name: Install uv
+        uses: astral-sh/setup-uv@v3
+        with:
+          version: "latest"
+          enable-cache: true
+
+      - name: Install dependencies
+        run: |
+          cd app/backend
+          uv sync
+
+      - name: Run migrations
+        run: | 
+          cd app/backend
+          uv run alembic upgrade head
