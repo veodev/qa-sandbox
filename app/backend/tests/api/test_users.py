@@ -48,5 +48,5 @@ async def test_get_user_by_id_not_found(client):
     random_uuid = uuid.uuid4()
     response = await client.get(f"/api/v1/users/{random_uuid}")
 
-    assert response.status_code == 405
+    assert response.status_code == 404
     assert response.json()["detail"] == "User not found"
