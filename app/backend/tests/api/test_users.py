@@ -50,3 +50,22 @@ async def test_get_user_by_id_not_found(client):
 
     assert response.status_code == 404
     assert response.json()["detail"] == "User not found"
+
+
+@pytest.mark.asyncio
+async def test_remove_user_by_id_success(client, valid_user):
+    create_resp = await client.post("/api/v1/users", json=valid_user)
+    assert create_resp.status_code == 201
+
+    user_id = create_resp.json()["id"]
+    remove_resp = await client.delete(f"/api/v1/users/{user_id}")
+    assert remove_resp.status_code == 200
+
+
+@pytest.mark.asyncio
+async def test_remove_user_by_id_not_found(client):
+    random_uuid = uuid.uuid4()
+    response = await client.delete(f"/api/v1/users/{random_uuid}")
+
+    assert response.status_code == 404
+    assert response.json()["detail"] == "User not found"

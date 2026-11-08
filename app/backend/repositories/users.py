@@ -1,6 +1,8 @@
+from typing import cast
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import delete, select
+from sqlalchemy.engine import CursorResult
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from models import User
@@ -22,3 +24,15 @@ async def create(db: AsyncSession, email: str, name: str, hashed_password: str) 
     await db.commit()
     await db.refresh(user)
     return user
+
+
+async def remove(db: AsyncSession, user_id: UUID) -> int:
+    query = delete(User).where(User.id == user_id)
+    result: CursorResult = cast(CursorResult, await db.execute(query))
+    await db.commit()
+    return result.rowcount
+
+
+async def get_all(db: AsyncSession) -> list[User]:
+    result = await db.execute(select(User))
+    return list(result.scalars().all())

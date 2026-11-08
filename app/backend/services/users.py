@@ -27,3 +27,13 @@ async def get_user_by_id(db: AsyncSession, user_id: UUID) -> User:
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
     return user
+
+
+async def remove_user(db: AsyncSession, user_id: UUID):
+    removed_count = await users_repo.remove(db, user_id)
+    if not removed_count:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+
+
+async def get_users(db: AsyncSession):
+    return await users_repo.get_all(db)
