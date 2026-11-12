@@ -59,7 +59,7 @@ async def test_remove_user_by_id_success(client, valid_user):
 
     user_id = create_resp.json()["id"]
     remove_resp = await client.delete(f"/api/v1/users/{user_id}")
-    assert remove_resp.status_code == 200
+    assert remove_resp.status_code == 204
 
 
 @pytest.mark.asyncio
