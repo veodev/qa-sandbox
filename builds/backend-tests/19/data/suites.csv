@@ -1,0 +1,8 @@
+"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
+"","149","test_create_user_success","tests.api","Thu Nov 12 12:30:30 GMT 2026","passed","Thu Nov 12 12:30:30 GMT 2026","","test_users","",""
+"","2","test_create_user_invalid_email","tests.api","Thu Nov 12 12:30:30 GMT 2026","passed","Thu Nov 12 12:30:30 GMT 2026","","test_users","",""
+"","83","test_create_user_duplicate_email","tests.api","Thu Nov 12 12:30:30 GMT 2026","passed","Thu Nov 12 12:30:30 GMT 2026","","test_users","",""
+"","10","test_remove_user_by_id_not_found","tests.api","Thu Nov 12 12:30:30 GMT 2026","passed","Thu Nov 12 12:30:30 GMT 2026","","test_users","",""
+"","87","test_remove_user_by_id_success","tests.api","Thu Nov 12 12:30:30 GMT 2026","failed","Thu Nov 12 12:30:30 GMT 2026","","test_users","",""
+"","9","test_get_user_by_id_not_found","tests.api","Thu Nov 12 12:30:30 GMT 2026","passed","Thu Nov 12 12:30:30 GMT 2026","","test_users","",""
+"","84","test_get_user_by_id_success","tests.api","Thu Nov 12 12:30:30 GMT 2026","passed","Thu Nov 12 12:30:30 GMT 2026","","test_users","",""
