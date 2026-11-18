@@ -1,5 +1,5 @@
 services:
-  postgres:
+  database:
     image: postgres:18-alpine
     container_name: qa-sandbox-postgres
     env_file:
@@ -8,8 +8,25 @@ services:
       POSTGRES_DB: qa_sandbox_db
     ports:
       - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 1s
+      timeout: 3s
+      retries: 10
     volumes:
       - postgres_data:/var/lib/postgresql
       - ./init-db:/docker-entrypoint-initdb.d
+  backend:
+    build: ./app/backend
+    container_name: qa-sandbox-backend
+    env_file:
+      - ./app/backend/.env
+    environment:
+      DB_HOST: database
+    ports:
+      - "8000:8000"
+    depends_on:
+      database:
+        condition: service_healthy
 volumes:
   postgres_data:
