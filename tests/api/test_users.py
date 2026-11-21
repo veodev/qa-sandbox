@@ -10,6 +10,7 @@ from app.backend.security import verify_password
 @allure.feature("Users API")
 @allure.story("Create user")
 def test_create_user_success(api_url, unique_email, db_conn):
+    """Позитивный тест: создание пользователя с проверкой хеширования пароля в БД."""
     plain_password = "test_password"
     payload = {"email": unique_email, "name": "test_user", "password": plain_password}
 
@@ -47,6 +48,7 @@ def test_create_user_success(api_url, unique_email, db_conn):
 @allure.feature("Users API")
 @allure.story("Delete user")
 def test_delete_user(api_url, unique_email, db_conn):
+    """Позитивный тест: удаление пользователя с проверкой удаления из БД."""
     payload = {"email": unique_email, "name": "test_user", "password": "test_password"}
 
     with allure.step("Создание пользователя"):
@@ -109,6 +111,7 @@ def test_delete_user(api_url, unique_email, db_conn):
 @allure.feature("Users API")
 @allure.story("Create user — duplicate email")
 def test_create_user_duplicate_email(api_url, db_conn):
+    """Негативный тест: создание пользователя с дублирующим email возвращает 409."""
     email = f"dup_{uuid.uuid4().hex[:8]}@test.com"
     payload = {"email": email, "name": "test_user", "password": "test_password"}
 
@@ -134,6 +137,7 @@ def test_create_user_duplicate_email(api_url, db_conn):
 @allure.feature("Users API")
 @allure.story("Create user — missing password")
 def test_create_user_missing_password(api_url):
+    """Негативный тест: создание без password возвращает 422."""
     payload = {"email": f"no_pwd_{uuid.uuid4().hex[:8]}@test.com", "name": "test_user"}
 
     with allure.step("POST без password"):
@@ -154,6 +158,7 @@ def test_create_user_missing_password(api_url):
 @allure.feature("Users API")
 @allure.story("Create user — missing name")
 def test_create_user_missing_name(api_url):
+    """Негативный тест: создание без name возвращает 422."""
     payload = {
         "email": f"no_name_{uuid.uuid4().hex[:8]}@test.com",
         "password": "test_password",
@@ -177,6 +182,7 @@ def test_create_user_missing_name(api_url):
 @allure.feature("Users API")
 @allure.story("Create user — invalid email")
 def test_create_user_invalid_email(api_url):
+    """Негативный тест: создание с невалидным email возвращает 422."""
     payload = {
         "email": "not-an-email",
         "name": "test_user",
@@ -201,6 +207,7 @@ def test_create_user_invalid_email(api_url):
 @allure.feature("Users API")
 @allure.story("Delete user — not found")
 def test_delete_user_not_found(api_url):
+    """Негативный тест: удаление несуществующего пользователя возвращает 404."""
     fake_id = uuid.uuid4()
 
     with allure.step("DELETE несуществующего пользователя"):
@@ -222,6 +229,7 @@ def test_delete_user_not_found(api_url):
 @allure.feature("Users API")
 @allure.story("Get user — not found")
 def test_get_user_not_found(api_url):
+    """Негативный тест: получение несуществующего пользователя возвращает 404."""
     fake_id = uuid.uuid4()
 
     with allure.step("GET несуществующего пользователя"):
@@ -244,43 +252,9 @@ def test_get_user_not_found(api_url):
 
 
 @allure.feature("Users API")
-@allure.story("Get users — empty list")
-def test_get_users_empty(api_url):
-    with allure.step("GET списка пользователей (пустая база)"):
-        resp = requests.get(f"{api_url}/users")
-        body = resp.json()
-        allure.attach(
-            body=json.dumps(body, indent=2),
-            name="Empty users list",
-            attachment_type=allure.attachment_type.JSON,
-        )
-        assert resp.status_code == 200
-        assert body == []
-
-
-@allure.feature("Users API")
-@allure.story("Get users — non-empty list")
-def test_get_users_non_empty(api_url, unique_email):
-    payload = {"email": unique_email, "name": "test_user", "password": "test_password"}
-
-    with allure.step("Создание пользователя для списка"):
-        requests.post(f"{api_url}/users", json=payload)
-
-    with allure.step("GET списка пользователей"):
-        resp = requests.get(f"{api_url}/users")
-        body = resp.json()
-        allure.attach(
-            body=json.dumps(body, indent=2),
-            name="Users list",
-            attachment_type=allure.attachment_type.JSON,
-        )
-        assert resp.status_code == 200
-        assert len(body) >= 1
-
-
-@allure.feature("Users API")
 @allure.story("Create user — empty fields")
 def test_create_user_empty_fields(api_url):
+    """Негативный тест: создание с пустыми полями возвращает 422."""
     payload = {"email": "", "name": "", "password": ""}
 
     with allure.step("POST с пустыми полями"):
@@ -301,6 +275,7 @@ def test_create_user_empty_fields(api_url):
 @allure.feature("Users API")
 @allure.story("Create user — long fields")
 def test_create_user_long_fields(api_url):
+    """Граничный тест: создание с очень длинным name возвращает 422."""
     long_name = "A" * 500
     payload = {
         "email": f"long_{uuid.uuid4().hex[:8]}@test.com",

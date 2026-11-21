@@ -30,6 +30,7 @@ def db_conn():
 @pytest.fixture(autouse=True)
 def clean_db(db_conn):
     yield
+    db_conn.execute("DELETE FROM works")
     db_conn.execute("DELETE FROM cars")
     db_conn.execute("DELETE FROM users")
     db_conn.commit()

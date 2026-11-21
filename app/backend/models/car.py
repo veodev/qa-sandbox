@@ -19,3 +19,4 @@ class Car(Base):
 
     # Связь для SQLAlchemy (чтобы можно было обращаться к car.owner)
     owner: Mapped["User"] = relationship(back_populates="cars")
+    works: Mapped[list["Work"]] = relationship(back_populates="car", cascade="all, delete-orphan")
