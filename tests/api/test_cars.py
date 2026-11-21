@@ -4,43 +4,16 @@ import uuid
 import allure
 import requests
 
+from tests.api.helpers import assert_status, create_car, create_user
+
 
 @allure.feature("Cars API")
 @allure.story("Create car")
-def test_create_car_success(api_url, unique_email, db_conn):
+def test_create_car_success(api_url, db_conn):
     """Позитивный тест: создание авто с проверкой сохранения в БД."""
-    # Сначала создаём пользователя
-    user_payload = {
-        "email": unique_email,
-        "name": "test_user",
-        "password": "test_password",
-    }
-    user_resp = requests.post(f"{api_url}/users", json=user_payload)
-    assert user_resp.status_code == 201
-    user_id = user_resp.json()["id"]
-
-    car_payload = {
-        "user_id": user_id,
-        "brand": "Toyota",
-        "model": "Camry",
-        "year": 2022,
-        "mileage": 15000,
-    }
-
-    with allure.step("Отправка POST запроса на создание авто"):
-        allure.attach(
-            body=json.dumps(car_payload, indent=2, default=str),
-            name="Car payload",
-            attachment_type=allure.attachment_type.JSON,
-        )
-        resp = requests.post(f"{api_url}/cars", json=car_payload)
-        allure.attach(
-            body=json.dumps(resp.json(), indent=2, default=str),
-            name="Create response",
-            attachment_type=allure.attachment_type.JSON,
-        )
-        assert resp.status_code == 201
-        car_id = resp.json()["id"]
+    user = create_user(api_url)
+    car = create_car(api_url, user["id"])
+    car_id = car["id"]
 
     with allure.step("Проверка сохранения в БД"):
         row = db_conn.execute(
@@ -58,28 +31,11 @@ def test_create_car_success(api_url, unique_email, db_conn):
 
 @allure.feature("Cars API")
 @allure.story("Delete car")
-def test_delete_car(api_url, unique_email, db_conn):
+def test_delete_car(api_url, db_conn):
     """Позитивный тест: удаление авто с проверкой удаления из БД."""
-    # Создаём пользователя и авто
-    user_payload = {
-        "email": unique_email,
-        "name": "test_user",
-        "password": "test_password",
-    }
-    user_resp = requests.post(f"{api_url}/users", json=user_payload)
-    assert user_resp.status_code == 201
-    user_id = user_resp.json()["id"]
-
-    car_payload = {
-        "user_id": user_id,
-        "brand": "Honda",
-        "model": "Civic",
-        "year": 2021,
-        "mileage": 20000,
-    }
-    car_resp = requests.post(f"{api_url}/cars", json=car_payload)
-    assert car_resp.status_code == 201
-    car_id = str(car_resp.json()["id"])
+    user = create_user(api_url)
+    car = create_car(api_url, user["id"])
+    car_id = car["id"]
 
     with allure.step("Проверка существования авто в БД"):
         row = db_conn.execute("SELECT id FROM cars WHERE id = %s", (car_id,)).fetchone()
@@ -103,7 +59,7 @@ def test_delete_car(api_url, unique_email, db_conn):
             name="Delete status code",
             attachment_type=allure.attachment_type.TEXT,
         )
-        assert delete_resp.status_code == 204
+        assert_status(delete_resp, 204)
 
     with allure.step("Проверка удаления из БД"):
         row = db_conn.execute("SELECT id FROM cars WHERE id = %s", (car_id,)).fetchone()
@@ -140,7 +96,7 @@ def test_create_car_user_not_found(api_url):
             name="Not found response",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert resp.status_code == 404
+        assert_status(resp, 404)
 
 
 @allure.feature("Cars API")
@@ -162,7 +118,7 @@ def test_delete_car_not_found(api_url):
             name="Not found response",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert resp.status_code == 404
+        assert_status(resp, 404)
 
 
 @allure.feature("Cars API")
@@ -184,4 +140,4 @@ def test_get_car_not_found(api_url):
             name="Not found response",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert resp.status_code == 404
+        assert_status(resp, 404)

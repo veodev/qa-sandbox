@@ -1,5 +1,4 @@
 import os
-import uuid
 
 import psycopg
 import pytest
@@ -14,11 +13,6 @@ DB_URL = os.getenv(
 @pytest.fixture(scope="session")
 def api_url():
     return "http://127.0.0.1:8000/api/v1"
-
-
-@pytest.fixture
-def unique_email():
-    return f"test_{uuid.uuid4().hex[:8]}@test.com"
 
 
 @pytest.fixture

@@ -5,14 +5,18 @@ import allure
 import requests
 
 from app.backend.security import verify_password
+from tests.api.helpers import assert_status, create_user
 
 
 @allure.feature("Users API")
 @allure.story("Create user")
-def test_create_user_success(api_url, unique_email, db_conn):
+def test_create_user_success(api_url, db_conn):
     """Позитивный тест: создание пользователя с проверкой хеширования пароля в БД."""
-    plain_password = "test_password"
-    payload = {"email": unique_email, "name": "test_user", "password": plain_password}
+    payload = {
+        "email": "test@test.com",
+        "name": "test_user",
+        "password": "test_password",
+    }
 
     with allure.step("Отправка POST запроса на создание пользователя"):
         allure.attach(
@@ -21,7 +25,7 @@ def test_create_user_success(api_url, unique_email, db_conn):
             attachment_type=allure.attachment_type.JSON,
         )
         post_response = requests.post(f"{api_url}/users", json=payload)
-        assert post_response.status_code == 201
+        assert_status(post_response, 201)
         user_id = post_response.json()["id"]
 
     with allure.step("Проверка сохранения в базе данных"):
@@ -34,38 +38,23 @@ def test_create_user_success(api_url, unique_email, db_conn):
             attachment_type=allure.attachment_type.JSON,
         )
         assert row is not None
-        assert row["hashed_password"] != plain_password
+        assert row["hashed_password"] != "test_password"
 
     with allure.step("Проверка хеширования пароля"):
         assert row["hashed_password"] is not None
-        assert row["hashed_password"] != plain_password, (
+        assert row["hashed_password"] != "test_password", (
             "password stored in plain text!"
         )
-        assert verify_password(plain_password, row["hashed_password"]) is True
+        assert verify_password("test_password", row["hashed_password"]) is True
         assert verify_password("wrong_password", row["hashed_password"]) is False
 
 
 @allure.feature("Users API")
 @allure.story("Delete user")
-def test_delete_user(api_url, unique_email, db_conn):
+def test_delete_user(api_url, db_conn):
     """Позитивный тест: удаление пользователя с проверкой удаления из БД."""
-    payload = {"email": unique_email, "name": "test_user", "password": "test_password"}
-
-    with allure.step("Создание пользователя"):
-        allure.attach(
-            body=json.dumps(payload, indent=2),
-            name="Request payload",
-            attachment_type=allure.attachment_type.JSON,
-        )
-        create_response = requests.post(f"{api_url}/users", json=payload)
-        create_json = create_response.json()
-        user_id = str(create_json["id"])
-        allure.attach(
-            body=json.dumps(create_json, indent=2),
-            name="Create response",
-            attachment_type=allure.attachment_type.JSON,
-        )
-        assert create_response.status_code == 201
+    user = create_user(api_url)
+    user_id = user["id"]
 
     with allure.step("Проверка существования пользователя в БД"):
         row = db_conn.execute(
@@ -91,14 +80,14 @@ def test_delete_user(api_url, unique_email, db_conn):
             name="Delete status code",
             attachment_type=allure.attachment_type.TEXT,
         )
-        assert delete_response.status_code == 204
+        assert_status(delete_response, 204)
 
     with allure.step("Проверка удаления пользователя из БД"):
         row = db_conn.execute(
             "SELECT id FROM users WHERE id = %s", (user_id,)
         ).fetchone()
         allure.attach(
-            body=json.dumps(row, indent=2),
+            body=json.dumps(row, indent=2, default=str),
             name="User after delete",
             attachment_type=allure.attachment_type.JSON,
         )
@@ -110,14 +99,17 @@ def test_delete_user(api_url, unique_email, db_conn):
 
 @allure.feature("Users API")
 @allure.story("Create user — duplicate email")
-def test_create_user_duplicate_email(api_url, db_conn):
+def test_create_user_duplicate_email(api_url):
     """Негативный тест: создание пользователя с дублирующим email возвращает 409."""
-    email = f"dup_{uuid.uuid4().hex[:8]}@test.com"
-    payload = {"email": email, "name": "test_user", "password": "test_password"}
+    payload = {
+        "email": "dup@test.com",
+        "name": "test_user",
+        "password": "test_password",
+    }
 
     with allure.step("Создание первого пользователя"):
         first = requests.post(f"{api_url}/users", json=payload)
-        assert first.status_code == 201
+        assert_status(first, 201)
 
     with allure.step("Попытка создания второго пользователя с тем же email"):
         allure.attach(
@@ -131,7 +123,7 @@ def test_create_user_duplicate_email(api_url, db_conn):
             name="Conflict response",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert second.status_code == 409
+        assert_status(second, 409)
 
 
 @allure.feature("Users API")
@@ -152,7 +144,7 @@ def test_create_user_missing_password(api_url):
             name="Validation error",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert resp.status_code == 422
+        assert_status(resp, 422)
 
 
 @allure.feature("Users API")
@@ -176,7 +168,7 @@ def test_create_user_missing_name(api_url):
             name="Validation error",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert resp.status_code == 422
+        assert_status(resp, 422)
 
 
 @allure.feature("Users API")
@@ -201,7 +193,7 @@ def test_create_user_invalid_email(api_url):
             name="Validation error",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert resp.status_code == 422
+        assert_status(resp, 422)
 
 
 @allure.feature("Users API")
@@ -223,7 +215,7 @@ def test_delete_user_not_found(api_url):
             name="Not found response",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert resp.status_code == 404
+        assert_status(resp, 404)
 
 
 @allure.feature("Users API")
@@ -245,10 +237,25 @@ def test_get_user_not_found(api_url):
             name="Not found response",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert resp.status_code == 404
+        assert_status(resp, 404)
 
 
-# ─── Neutral / boundary tests ──────────────────────────────────────────────
+@allure.feature("Users API")
+@allure.story("Get users — non-empty list")
+def test_get_users_non_empty(api_url):
+    """Позитивный тест: GET списка после создания пользователя возвращает 200 + данные."""
+    create_user(api_url)
+
+    with allure.step("GET списка пользователей"):
+        resp = requests.get(f"{api_url}/users")
+        body = resp.json()
+        allure.attach(
+            body=json.dumps(body, indent=2, default=str),
+            name="Users list",
+            attachment_type=allure.attachment_type.JSON,
+        )
+        assert_status(resp, 200)
+        assert len(body) >= 1
 
 
 @allure.feature("Users API")
@@ -269,7 +276,7 @@ def test_create_user_empty_fields(api_url):
             name="Validation error",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert resp.status_code == 422
+        assert_status(resp, 422)
 
 
 @allure.feature("Users API")
@@ -299,4 +306,4 @@ def test_create_user_long_fields(api_url):
             name="Response",
             attachment_type=allure.attachment_type.JSON,
         )
-        assert resp.status_code == 422
+        assert_status(resp, 422)
