@@ -17,15 +17,6 @@ if config.config_file_name is not None:
 target_metadata = Base.metadata
 
 
-def get_url():
-    x_args = context.get_x_argument(as_dictionary=True)
-    db_type = x_args.get("db")
-
-    if db_type == "test":
-        return settings.TEST_DATABASE_URL
-    return settings.DATABASE_URL
-
-
 def run_migrations_offline() -> None:
     url = settings.DATABASE_URL
     context.configure(
@@ -45,7 +36,7 @@ def do_run_migrations(connection: Connection) -> None:
 
 
 async def run_async_migrations() -> None:
-    connectable = create_async_engine(get_url(), poolclass=pool.NullPool)
+    connectable = create_async_engine(settings.DATABASE_URL, poolclass=pool.NullPool)
     async with connectable.connect() as connection:
         await connection.run_sync(do_run_migrations)
     await connectable.dispose()

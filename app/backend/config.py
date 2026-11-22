@@ -2,13 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    POSTGRES_USER: str
-    POSTGRES_PASSWORD: str
-    DB_HOST: str
-    DB_PORT: str
-    DB_BASE: str
     DATABASE_URL: str
-    TEST_DATABASE_URL: str
 
     model_config = SettingsConfigDict(
         env_file=".env",

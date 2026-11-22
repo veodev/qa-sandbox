@@ -9,14 +9,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:    
-      POSTGRES_USER: qa_sandbox_user
-      POSTGRES_PASSWORD: qa_sandbox_pass
-      POSTGRES_DB: qa_sandbox_test_db
-      DB_HOST: localhost
-      DB_PORT: 5432
-      DB_BASE: postgresql+asyncpg://qa_sandbox_user:qa_sandbox_pass@localhost:5432
-      DATABASE_URL: postgresql+asyncpg://qa_sandbox_user:qa_sandbox_pass@localhost:5432/qa_sandbox_test_db
-      TEST_DATABASE_URL: postgresql+asyncpg://qa_sandbox_user:qa_sandbox_pass@localhost:5432/qa_sandbox_test_db
+      DATABASE_URL: postgresql+asyncpg://qa_sandbox_user:qa_sandbox_pass@localhost:5432/qa_sandbox_db
     
     services:
       postgres:
@@ -24,32 +17,41 @@ jobs:
         env:
           POSTGRES_USER: qa_sandbox_user
           POSTGRES_PASSWORD: qa_sandbox_pass
-          POSTGRES_DB: qa_sandbox_test_db
+          POSTGRES_DB: qa_sandbox_db
         ports:
           - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 10
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        uses: actions/checkout@v4
 
       - name: "Set up Python"
-        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        uses: actions/setup-python@v5
         with:
           python-version-file: ".python-version"
           
       - name: Install uv
-        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
 
       - name: Install dependencies
         run: uv sync
 
       - name: Run migrations
-        run: | 
+        run: uv run --directory app/backend alembic upgrade head
+
+      - name: Start backend
+        run:  |
           cd app/backend
-          uv run alembic upgrade head
+          uv run uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
 
       - name: Run tests
-        run: uv run pytest -v
+        run: uv run pytest -v --alluredir=allure-results
 
       - name: Load Allure test report history
         uses: actions/checkout@v4
@@ -64,7 +66,7 @@ jobs:
         id: allure-report
         if: always()
         with:
-          allure-results: app/backend/allure-results
+          allure-results: allure-results
           website: gh-pages-dir
           reports-site-path: builds/backend-tests
           report-page: behaviors

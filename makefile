@@ -113,10 +113,7 @@ run-backend: .check-docker .db .migrate
 
 .migrate:
 	@$(call log_info,Apply database migrations...,$(CYAN))
-	@$(call log_info,For main database...,$(CYAN))
 	@uv run --directory app/backend alembic upgrade head
-	@$(call log_info,For testing database...,$(CYAN))
-	@uv run --directory app/backend alembic -x db=test upgrade head
 
 # Apply database migrations manually
 migrate: .check-docker .migrate

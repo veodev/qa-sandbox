@@ -11,9 +11,13 @@ from tests.api.helpers import assert_status, create_car, create_user
 @allure.story("Create car")
 def test_create_car_success(api_url, db_conn):
     """Позитивный тест: создание авто с проверкой сохранения в БД."""
-    user = create_user(api_url)
-    car = create_car(api_url, user["id"])
-    car_id = car["id"]
+    _, post_response = create_user(api_url)
+    assert_status(post_response, 201)
+    user_id = post_response.json()["id"]
+
+    _, post_response = create_car(api_url, user_id)
+    assert_status(post_response, 201)
+    car_id = post_response.json()["id"]
 
     with allure.step("Проверка сохранения в БД"):
         row = db_conn.execute(
@@ -33,9 +37,13 @@ def test_create_car_success(api_url, db_conn):
 @allure.story("Delete car")
 def test_delete_car(api_url, db_conn):
     """Позитивный тест: удаление авто с проверкой удаления из БД."""
-    user = create_user(api_url)
-    car = create_car(api_url, user["id"])
-    car_id = car["id"]
+    _, post_response = create_user(api_url)
+    assert_status(post_response, 201)
+    user_id = post_response.json()["id"]
+
+    _, post_response = create_car(api_url, user_id)
+    assert_status(post_response, 201)
+    car_id = post_response.json()["id"]
 
     with allure.step("Проверка существования авто в БД"):
         row = db_conn.execute("SELECT id FROM cars WHERE id = %s", (car_id,)).fetchone()

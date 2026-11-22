@@ -12,19 +12,14 @@ from tests.api.helpers import assert_status, create_user
 @allure.story("Create user")
 def test_create_user_success(api_url, db_conn):
     """Позитивный тест: создание пользователя с проверкой хеширования пароля в БД."""
-    payload = {
-        "email": "test@test.com",
-        "name": "test_user",
-        "password": "test_password",
-    }
 
     with allure.step("Отправка POST запроса на создание пользователя"):
+        payload, post_response = create_user(api_url)
         allure.attach(
             body=json.dumps(payload, indent=2),
             name="Post request",
             attachment_type=allure.attachment_type.JSON,
         )
-        post_response = requests.post(f"{api_url}/users", json=payload)
         assert_status(post_response, 201)
         user_id = post_response.json()["id"]
 
@@ -53,8 +48,8 @@ def test_create_user_success(api_url, db_conn):
 @allure.story("Delete user")
 def test_delete_user(api_url, db_conn):
     """Позитивный тест: удаление пользователя с проверкой удаления из БД."""
-    user = create_user(api_url)
-    user_id = user["id"]
+    _, post_response = create_user(api_url)
+    user_id = post_response.json()["id"]
 
     with allure.step("Проверка существования пользователя в БД"):
         row = db_conn.execute(

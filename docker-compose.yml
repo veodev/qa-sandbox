@@ -2,10 +2,11 @@ services:
   database:
     image: postgres:18-alpine
     container_name: qa-sandbox-postgres
-    env_file:
-      - ./app/backend/.env
     environment:
+      POSTGRES_USER: qa_sandbox_user
+      POSTGRES_PASSWORD: qa_sandbox_pass
       POSTGRES_DB: qa_sandbox_db
+      DATABASE_URL: postgresql+asyncpg://qa_sandbox_user:qa_sandbox_pass@database:5432/qa_sandbox_db
     ports:
       - "5432:5432"
     healthcheck:
@@ -15,14 +16,11 @@ services:
       retries: 10
     volumes:
       - postgres_data:/var/lib/postgresql
-      - ./init-db:/docker-entrypoint-initdb.d
   backend:
     build: ./app/backend
     container_name: qa-sandbox-backend
     env_file:
-      - ./app/backend/.env
-    environment:
-      DB_HOST: database
+      - ./app/backend/.env.docker
     ports:
       - "8000:8000"
     depends_on:

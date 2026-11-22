@@ -5,11 +5,13 @@ import requests
 
 def create_user(api_url):
     """Создаёт пользователя и возвращает json с id."""
-    email = f"test_{uuid.uuid4().hex[:8]}@test.com"
-    payload = {"email": email, "name": "test_user", "password": "test_password"}
-    resp = requests.post(f"{api_url}/users", json=payload)
-    assert resp.status_code == 201
-    return resp.json()
+    payload = {
+        "email": f"test_{uuid.uuid4().hex[:8]}@test.com",
+        "name": "test_user",
+        "password": "test_password",
+    }
+    response = requests.post(f"{api_url}/users", json=payload)
+    return (payload, response)
 
 
 def create_car(api_url, user_id):
@@ -21,9 +23,8 @@ def create_car(api_url, user_id):
         "year": 2022,
         "mileage": 15000,
     }
-    resp = requests.post(f"{api_url}/cars", json=payload)
-    assert resp.status_code == 201
-    return resp.json()
+    response = requests.post(f"{api_url}/cars", json=payload)
+    return (payload, response)
 
 
 def create_work(api_url, car_id):
@@ -35,9 +36,8 @@ def create_work(api_url, car_id):
         "cost": 1500.0,
         "performed_date": "2024-06-15",
     }
-    resp = requests.post(f"{api_url}/works", json=payload)
-    assert resp.status_code == 201
-    return resp.json()
+    response = requests.post(f"{api_url}/works", json=payload)
+    return (payload, response)
 
 
 def assert_status(resp, expected):

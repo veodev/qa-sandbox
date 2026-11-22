@@ -11,10 +11,17 @@ from tests.api.helpers import assert_status, create_car, create_user, create_wor
 @allure.story("Create work")
 def test_create_work_success(api_url, db_conn):
     """Позитивный тест: создание записи о работе с проверкой сохранения в БД."""
-    user = create_user(api_url)
-    car = create_car(api_url, user["id"])
-    work = create_work(api_url, car["id"])
-    work_id = work["id"]
+    _, post_response = create_user(api_url)
+    assert_status(post_response, 201)
+    user_id = post_response.json()["id"]
+
+    _, post_response = create_car(api_url, user_id)
+    assert_status(post_response, 201)
+    car_id = post_response.json()["id"]
+
+    _, post_response = create_work(api_url, car_id)
+    assert_status(post_response, 201)
+    work_id = post_response.json()["id"]
 
     with allure.step("Проверка сохранения в БД"):
         row = db_conn.execute(
@@ -35,10 +42,17 @@ def test_create_work_success(api_url, db_conn):
 @allure.story("Delete work")
 def test_delete_work(api_url, db_conn):
     """Позитивный тест: удаление записи о работе с проверкой удаления из БД."""
-    user = create_user(api_url)
-    car = create_car(api_url, user["id"])
-    work = create_work(api_url, car["id"])
-    work_id = work["id"]
+    _, post_response = create_user(api_url)
+    assert_status(post_response, 201)
+    user_id = post_response.json()["id"]
+
+    _, post_response = create_car(api_url, user_id)
+    assert_status(post_response, 201)
+    car_id = post_response.json()["id"]
+
+    _, post_response = create_work(api_url, car_id)
+    assert_status(post_response, 201)
+    work_id = post_response.json()["id"]
 
     with allure.step("Проверка существования работы в БД"):
         row = db_conn.execute(
@@ -132,12 +146,19 @@ def test_delete_work_not_found(api_url):
 @allure.story("Get works by car")
 def test_get_works_by_car(api_url, db_conn):
     """Позитивный тест: получение списка работ для конкретного автомобиля."""
-    user = create_user(api_url)
-    car = create_car(api_url, user["id"])
-    create_work(api_url, car["id"])
+    _, post_response = create_user(api_url)
+    assert_status(post_response, 201)
+    user_id = post_response.json()["id"]
+
+    _, post_response = create_car(api_url, user_id)
+    assert_status(post_response, 201)
+    car_id = post_response.json()["id"]
+
+    _, post_response = create_work(api_url, car_id)
+    assert_status(post_response, 201)
 
     with allure.step("GET работ по авто"):
-        get_url = f"{api_url}/works/car/{car['id']}"
+        get_url = f"{api_url}/works/car/{car_id}"
         allure.attach(
             body=get_url,
             name="Works by car URL",

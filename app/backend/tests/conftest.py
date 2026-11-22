@@ -12,7 +12,7 @@ from main import app
 
 @pytest_asyncio.fixture(scope="session")
 async def engine():
-    test_engine = create_async_engine(settings.TEST_DATABASE_URL, poolclass=NullPool)
+    test_engine = create_async_engine(settings.DATABASE_URL, poolclass=NullPool)
     yield test_engine
     await test_engine.dispose()
 
