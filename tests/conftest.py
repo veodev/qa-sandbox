@@ -5,8 +5,8 @@ import pytest
 from psycopg.rows import dict_row
 
 DB_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://qa_sandbox_user:qa_sandbox_pass@127.0.0.1:5432/qa_sandbox_db",
+    "TEST_DATABASE_URL",
+    "postgresql://qa_sandbox_user:qa_sandbox_pass@127.0.0.1:5432/qa_sandbox_test_db",
 )
 
 
