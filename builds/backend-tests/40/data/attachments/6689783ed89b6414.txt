@@ -1,0 +1,1 @@
+http://127.0.0.1:8000/api/v1/users/b587b4ff-ed04-4afe-b6a0-25e2c4805e19
