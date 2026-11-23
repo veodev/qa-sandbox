@@ -1,13 +1,24 @@
 <!DOCTYPE html>
 <html lang="ru">
-    <head>
-        <meta charset="UTF-8">
-        <link href="./style.css"/ rel="stylesheet">
-        <title>QA Sandbox Frontend</title>
-    </head>
-    <body>
-        <h1>Dashboard</h1>
-
-        <script src="./script.js"></script>
-    </body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QA Sandbox — Дашборд</title>
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="auth-container">
+        <h1>Дашборд</h1>
+        <p>Здесь будет контент</p>
+        <a href="index.html" class="btn btn-primary" style="margin-top: 20px;">Выйти</a>
+    </div>
+    <script>
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'index.html';
+        }
+        document.querySelector('.btn').addEventListener('click', () => {
+            localStorage.removeItem('isLoggedIn');
+        });
+    </script>
+</body>
 </html>
