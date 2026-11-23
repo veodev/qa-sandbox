@@ -26,5 +26,17 @@ services:
     depends_on:
       database:
         condition: service_healthy
+
+  frontend:
+    image: nginx:alpine
+    container_name: qa-sandbox-frontend
+    ports:
+      - "80:80"
+    volumes:
+      - ./app/frontend:/usr/share/nginx/html:ro
+      - ./app/frontend/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+
 volumes:
   postgres_data:

@@ -36,9 +36,10 @@ endef
 
 define print_endpoints
 	@$(call print_line,,#)
-	@$(call log_info,Backend API  : http://localhost:8000,$(CYAN))
-	@$(call log_info,Swagger Docs : http://localhost:8000/docs,$(CYAN))
-	@$(call log_info,PostgreSQL   : http://localhost:5432,$(CYAN))
+	@$(call log_info,Frontend\t\t: http://localhost,$(CYAN))
+	@$(call log_info,Backend API\t: http://localhost:8000,$(CYAN))
+	@$(call log_info,Swagger Docs\t: http://localhost:8000/docs,$(CYAN))
+	@$(call log_info,PostgreSQL\t: http://localhost:5432,$(CYAN))
 	@$(call print_line,,#)
 endef
 
@@ -77,7 +78,6 @@ help:
 	@$(call print,make report\t\t: Generate & view Allure report)
 	@$(call print_line)
 
-# DOCKER - Full Stand
 # Build & start full stand (DB + Backend + Frontend)
 up: .check-docker
 	@$(call log_info,Pull and build docker containers...,$(CYAN))
@@ -111,6 +111,9 @@ db: .check-docker .db
 run-backend: .check-docker .db .migrate
 	@uv run --directory app/backend uvicorn main:app --reload --port 8001 || true
 
+run-frontend:
+	@uv run --directory app/frontend python -m http.server 3000
+
 .migrate:
 	@$(call log_info,Apply database migrations...,$(CYAN))
 	@uv run --directory app/backend alembic upgrade head
@@ -119,10 +122,10 @@ run-backend: .check-docker .db .migrate
 migrate: .check-docker .migrate
 	@$(call print_success)
 
-# clean:
-# 	@$(MAKE) .check-docker
-# 	@docker compose down -v
+test:
+	@uv run pytest tests/api --alluredir=allure-results
 
+# Generate & view Allure report
 report:
 	@echo "Generating Allure report..."
 	@uv run pytest tests/ --alluredir=allure-results

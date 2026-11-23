@@ -1,4 +1,6 @@
-const API_URL = 'http://localhost:8000/api/v1';
+const API_URL = window.location.hostname === 'localhost' && window.location.port !== '80'
+    ? 'http://localhost:8000/api/v1'
+    : '/api/v1';
 
 // Переключение форм
 document.getElementById('show-register').addEventListener('click', (e) => {
