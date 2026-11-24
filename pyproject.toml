@@ -1,0 +1,20 @@
+[project]
+name = "qa-sandbox"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "allure-pytest>=2.16.2",
+    "playwright>=1.65.2",
+    "psycopg[binary]>=3.3.9",
+    "pwdlib[argon2]>=0.4.2",
+    "pytest>=9.2.0",
+    "pytest-playwright>=0.10.0",
+    "requests>=2.34.2",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+addopts = "--alluredir=allure-results --clean-alluredir"

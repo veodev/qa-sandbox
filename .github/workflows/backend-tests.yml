@@ -1,0 +1,81 @@
+name: Backend Tests 
+
+on:
+  push:
+    branches: ["master", "dev"]
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:    
+      DATABASE_URL: postgresql+asyncpg://qa_sandbox_user:qa_sandbox_pass@localhost:5432/qa_sandbox_db
+    
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: qa_sandbox_user
+          POSTGRES_PASSWORD: qa_sandbox_pass
+          POSTGRES_DB: qa_sandbox_db
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 1s
+          --health-timeout 1s
+          --health-retries 10
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: "Set up Python"
+        uses: actions/setup-python@v5
+        with:
+          python-version-file: ".python-version"
+          
+      - name: Install uv
+        uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9
+
+      - name: Install dependencies
+        run: uv sync
+
+      - name: Run migrations
+        run: uv run --directory app/backend alembic upgrade head
+
+      - name: Start backend
+        run:  |
+          cd app/backend
+          uv run uvicorn main:app --host 0.0.0.0 --port 8000 &
+          sleep 5
+
+      - name: Run tests
+        run: uv run pytest -v --alluredir=allure-results
+
+      - name: Load Allure test report history
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages-dir
+
+      - name: Generate Allure test report
+        uses: andgineer/allure-report@v3.5
+        id: allure-report
+        if: always()
+        with:
+          allure-results: allure-results
+          website: gh-pages-dir
+          reports-site-path: builds/backend-tests
+          report-page: behaviors
+
+      - name: Publish Allure test report
+        uses: peaceiris/actions-gh-pages@v3
+        if: ${{ always() && (steps.allure-report.outcome == 'success') }}
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ${{ steps.allure-report.outputs.reports-site }}
+          destination_dir: ${{ steps.allure-report.outputs.reports-site-path }}
