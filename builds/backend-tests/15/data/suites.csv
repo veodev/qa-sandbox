@@ -1,6 +1,0 @@
-"DESCRIPTION","DURATION IN MS","NAME","PARENT SUITE","START TIME","STATUS","STOP TIME","SUB SUITE","SUITE","TEST CLASS","TEST METHOD"
-"","100","test_create_user_duplicate_email","tests.api","Fri Nov 06 12:21:38 GMT 2026","passed","Fri Nov 06 12:21:38 GMT 2026","","test_users","",""
-"","12","test_get_user_by_id_not_found","tests.api","Fri Nov 06 12:21:38 GMT 2026","passed","Fri Nov 06 12:21:38 GMT 2026","","test_users","",""
-"","2","test_create_user_invalid_email","tests.api","Fri Nov 06 12:21:38 GMT 2026","passed","Fri Nov 06 12:21:38 GMT 2026","","test_users","",""
-"","104","test_create_user_success","tests.api","Fri Nov 06 12:21:38 GMT 2026","passed","Fri Nov 06 12:21:38 GMT 2026","","test_users","",""
-"","98","test_get_user_by_id_success","tests.api","Fri Nov 06 12:21:38 GMT 2026","passed","Fri Nov 06 12:21:38 GMT 2026","","test_users","",""

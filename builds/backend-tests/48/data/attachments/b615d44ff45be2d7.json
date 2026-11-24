@@ -1,0 +1,16 @@
+{
+  "detail": [
+    {
+      "type": "missing",
+      "loc": [
+        "body",
+        "password"
+      ],
+      "msg": "Field required",
+      "input": {
+        "email": "no_pwd_51cd391a@test.com",
+        "name": "test_user"
+      }
+    }
+  ]
+}
