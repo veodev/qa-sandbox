@@ -1,39 +1,45 @@
 # QA Sandbox 🚗
 
-QA Sandbox — это полноценное Fullstack веб-приложение для учета автомобилей и работ по ним. Проект создан как полигон для отработки навыков ручного и автоматизированного тестирования (QA, QA Automation), а также демонстрации понимания Backend-разработки.
+Демонстрационный стенд для отработки подходов к автоматизации тестирования.
+Система учёта автомобилей и сервисного обслуживания (создание пользователей, авто, записей о работах).
+Включает бэкенд (FastAPI, Uvicorn), базу данных (PostgreSQL) и фронтенд (JS, Nginx), упакованные в Docker.
 
-# Технологический стек
-✅ Используется в проекте:
-- **Backend:** *Python 3.14, Fastapi, Pydantic*
-- **Database:** *PostgreSQL, SQLAlchemy, Alembic*
-- **API Testing:** *Pytest, pytest-asyncio, httpx*
-- **Infrastructure:** *Docker, GitHub Actions, Allure Reports, GitHub Pages, uv*
+🔗 **[Живой Allure-отчет](https://veodev.github.io/qa-sandbox/builds/backend-tests/)** | 📄 **[Swagger UI](http://localhost:8000/docs)** *(доступен после локального запуска)*
 
-⏳ В процессе изучения и интеграции (Roadmap):
-- **Frontend:** *HTML, CSS, Vanilla JS, Vue.js*
-- **E2E Testing:** *Playwright*
-- **AI Tools:** *Ollama, AI-Agents*
+## 🛠 Технологический стек
 
-## Быстрый старт 🚀
-### 1. Предварительные требования
-- Убедитесь, что у вас установлены:
-    - Docker и Docker Compose
-    - uv (менеджер пакетов Python)
-    - Make (для Windows: `winget install GnuWin32.Make`)
-### 2. Клонирование и запуск
-- git clone https://github.com/veodev/qa-sandbox.git
-- cd qa-sandbox
-- uv sync
-- make up
-- uv run uvicorn main:app --reload
+| Категория | Инструменты |
+| :--- | :--- |
+| **Testing** | Python, Pytest, requests, Allure, psycopg |
+| **Backend** | FastAPI, SQLAlchemy (async), Alembic |
+| **Frontend** | HTML5, CSS3, Vanilla JS, Nginx |
+| **Database** | PostgreSQL, asyncpg |
+| **Infrastructure** | Docker, Docker Compose, Nginx |
+| **CI/CD** | GitHub Actions, GitHub Pages |
 
-docker compose up -d
-docker compose down -v
+## 🎯 Что внутри (Ключевые фишки)
 
-uv run alembic upgrade head
-uv run alembic upgrade head
-uv run alembic -x db=test upgrade head
+*   **21 интеграционный тест:** Позитивные, негативные и граничные сценарии. Проверка каскадного удаления и связей сущностей.
+*   **White Box проверки:** Тесты ходят напрямую в БД (через `psycopg`), чтобы проверять хеширование паролей и целостность данных, которые скрыты от API.
+*   **Изоляция тестов:** Каждый тест запускается на чистой БД (фикстура с `TRUNCATE`), что исключает влияние тестов друг на друга.
+*   **CI/CD:** Настроен пайплайн в GitHub Actions, который поднимает БД, накатывает миграции, запускает тесты и публикует Allure-отчет на GitHub Pages.
+*   **AI-Assisted:** ИИ (GigaCode) использовался для генерации boilerplate-кода и фикстур.
 
-uv run uvicorn main:app --reload
+## 🚀 Быстрый старт
 
-[Allure Report](https://veodev.github.io/qa-sandbox/builds/backend-tests/)
+Требования: Docker, `uv`, `make` (для Windows: `winget install GnuWin32.Make`, запускать в Git Bash).
+
+```bash
+# 1. Клонировать репозиторий
+git clone https://github.com/veodev/qa-sandbox.git
+cd qa-sandbox
+
+# 2. Установить зависимости
+uv sync
+
+# 3. Поднять инфраструктуру (БД + Backend + Frontend)
+make up
+
+# 4. Запустить тесты и открыть отчет
+make test
+make report

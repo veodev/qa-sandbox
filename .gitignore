@@ -224,3 +224,6 @@ __marimo__/
 # Allure
 allure-results/
 allure-report/
+
+# Ai
+.gigacode*
