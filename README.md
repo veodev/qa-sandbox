@@ -37,9 +37,12 @@ cd qa-sandbox
 # 2. Установить зависимости
 uv sync
 
-# 3. Поднять инфраструктуру (БД + Backend + Frontend)
+# 3. Создать конфигурацию для Docker
+make setup
+
+# 4. Поднять инфраструктуру (БД + Backend + Frontend)
 make up
 
-# 4. Запустить тесты и открыть отчет
+# 5. Запустить тесты и открыть отчет
 make test
 make report

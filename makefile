@@ -1,4 +1,4 @@
-.PHONY: help up down clean run-backend run-frontend db .check-docker .migrate .db
+.PHONY: help up down clean setup run-backend run-frontend db .check-docker .migrate .db .check-env
 
 MAKEFLAGS += --no-print-directory
 
@@ -11,27 +11,27 @@ DOCKER_CHECK := $(shell docker info > /dev/null 2>&1 && echo OK)
 
 # Usage: $(call print,text,color)
 define print
-	@echo -e "$(1)$(2)$(NC)"
+	echo -e "$(1)$(2)$(NC)"
 endef
 
 # Usage: $(call print_line,color,symbol(default='='),count(default=50))
 define print_line
-	@printf "$(1)%$(if $(3),$(3),50)s$(NC)\n" "" | tr " " "$(if $(2),$(2),=)"
+	printf "$(1)%$(if $(3),$(3),50)s$(NC)\n" "" | tr " " "$(if $(2),$(2),=)"
 endef
 
 # Usage: $(call log_info,message,color) 
 define log_info
-	@echo -e "$(2)[Info] $(1)$(NC)"
+	echo -e "$(2)[Info] $(1)$(NC)"
 endef
 
 # Usage: $(call log_error,message) 
 define log_error
-	@echo -e "$(RED)[Error]$(1)$(NC)"
+	echo -e "$(RED)[Error]$(1)$(NC)"
 endef
 
 # Usage: $(call print_success)
 define print_success
-	@$(call log_info,Done!,$(GREEN))
+	$(call log_info,Done!,$(GREEN))
 endef
 
 define print_endpoints
@@ -62,6 +62,7 @@ help:
 	@$(call print_line,,-)
 	@$(call print,\t[DOCKER - Full Stand])
 	@$(call print,make up\t\t\t: Build & start full stand (DB + Backend + Frontend))
+	@$(call print,make setup\t\t: Create .env.docker from example)
 	@$(call print,make down\t\t: Stop and remove containers)
 	@$(call print,make clean\t\t: Stop and remove containers and volumes)
 	@$(call print_line,,-)
@@ -79,11 +80,29 @@ help:
 	@$(call print_line)
 
 # Build & start full stand (DB + Backend + Frontend)
-up: .check-docker
+up: .check-docker .check-env
 	@$(call log_info,Pull and build docker containers...,$(CYAN))
 	@docker compose up -d --build --wait
 	@$(call print_endpoints)
 	@$(call print_success)
+
+# Create .env.docker from example if it doesn't exist
+setup: 
+	@if [ ! -f ./app/backend/.env.docker ]; then \
+		$(call log_info,Creating .env.docker from example...,$(CYAN)); \
+		cp app/backend/.env.docker.example app/backend/.env.docker; \
+		$(call print_success); \
+	else \
+		$(call log_info,.env.docker already exists,$(GREEN)); \
+	fi
+
+# Check if .env.docker exists
+.check-env:
+	@if [ ! -f ./app/backend/.env.docker ]; then \
+		$(call log_error,.env.docker not found); \
+		$(call print,Create it from the example: make setup,$(CYAN)); \
+		exit 1; \
+	fi
 
 # Stop and remove containers
 down: .check-docker
